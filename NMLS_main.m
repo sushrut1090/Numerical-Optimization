@@ -14,7 +14,8 @@ grad = @(x)[-400*x(1)*(x(2).^2 -x(1).^2) - 2*(1 - x(1));
             400*x(2)*(x(2).^2 - x(1).^2)];
 hess = @(x) -[400*(x(2).^2-3*x(1)^2)+2 800*x(1)*x(2);
             800*x(1)*x(2) -400*(3*x(2)^2 -x(1)^2)];
-x0 = [-1.2;1.2];
+x0 = [-1.8;-1.8];
+sol = [1;1];
 
 % ex2
 % f = @(x) x(1).^2 + 4*x(2).^2 + 2*x(1)*x(2);
@@ -23,6 +24,7 @@ x0 = [-1.2;1.2];
 % hess = @(x) [2 2;
 %             2 8];
 % x0 = [-3;-3];
+% sol = [0;0];
 
 % ex3
 % f = @(x) (x(1)+2*x(2)-7).^2 + (2*x(1)+x(2)-5).^2;
@@ -47,6 +49,7 @@ x0 = [-1.2;1.2];
 %  hess = @(x)[100*(30*x(1)^4-12*x(1)*x(2))+2 -600*x(1)^2;
 %              -600*x(1)^2 200];
 %  x0 = [-1.2;-1];
+% sol = [1;1];
 
 % powell
 % f = @(x) (x(1)+10*x(2))^2+5*(x(3)-x(4))^2+(x(2)-2*x(3))^4 + 10*(x(1)-x(4))^4;
@@ -59,6 +62,7 @@ x0 = [-1.2;1.2];
 %             0, -24*(x(2)-2*x(3))^2, 10+48*(x(2)-2*x(3))^2, -10;
 %             -120*(x(1)-x(4))^2, 0, -5, 5+120*(x(1)-x(4))^2];
 % x0 = [3;-1;0;1];
+% sol = [0;0;0;0];
 
 % wood
 % f = @(x) 100*(x(1)^2-x(2))^2 + (x(1)-1)^2 + (x(3)-1)^2 + 90*(x(3)^2-x(4))^2;
@@ -66,7 +70,8 @@ x0 = [-1.2;1.2];
 %             -200*(x(1)^2-x(2));
 %             2*(x(3)-1)+90*(x(3)^2-x(4))*(2*x(3));
 %             -180*(x(3)^2-x(4))];
-% x0 = [-3;-1;-3;-1];
+% x0 = [1.5;1.5;1.5;1.5];
+% sol = [1;1;1;1];
 
 % trig n=2
 % f = @(x) (1 + (1-cos(x)) - sin(x) - cos(x))^2;
@@ -75,22 +80,35 @@ x0 = [-1.2;1.2];
 
 
 para = [0.1,0.9,0.1,0.9,1.3,0.9];
+para2 = [1,0.1,0.9];
 nk = (para(1)+para(2))/2;
 C = f(x0); Q = 1;
 x = x0; 
 B = eye(size(x0,1));
 H=B;
-for i = 1:20000
-%[xx,alpha(i)] = NonMonotoneLineSearch(x,f,grad,para,C,hess); 
+for i = 1:500
+%[xx,alpha(i),fun_count(i),grad_count(i)] = SteepestDescentDirection(f,grad,x,para2);
+%[xx,alpha(i),fun_count(i),grad_count(i)] = NonMonotoneLineSearch(x,f,grad,para,C,hess); 
 [B,H,xx,alpha(i)] = BFGS(f,grad,x,B);
+%[xx,alpha(i),fun_count(i),grad_count(i)] = NewtonDirection(f,grad,hess,x,para2);
 x = xx;
 
 QQ = nk*Q +1;
 CC = (nk*Q*C + f(xx))/QQ;
-
-if (norm(grad(xx)) < 1e-10)
+%fun_count(i) = fun_count(i)+1;
+error(i) = norm(xx - sol);
+if (norm(grad(xx)) < 1e-8 || error(i)<1e-4)
     break;
 end
 Q = QQ; C = CC;
 end
+figure(1)
 plot(alpha)
+title('Step size alpha over iterations')
+xlabel('iteration')
+ylabel('Step size')
+figure(2)
+plot(error)
+title('Error ||analytic - final||')
+xlabel('iteration')
+ylabel('Error')

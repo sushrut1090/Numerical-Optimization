@@ -22,14 +22,15 @@ close all;
 % hess = @(x) [2 2;2 8];
 % x0 = [3;3];
 
-%rosenbruck
+%rosenbruck - f1
 % f = @(x) 100*(x(2).^2-x(1).^2).^2 + (1-x(1)).^2;
 % 
 % grad = @(x)[-400*x(1)*(x(2).^2 -x(1).^2) - 2*(1 - x(1));
 %             400*x(2)*(x(2).^2 - x(1).^2)];
 % hess = @(x) -[400*(x(2).^2-3*x(1)^2)+2 800*x(1)*x(2);
 %             800*x(1)*x(2) -400*(3*x(2)^2 -x(1)^2)];
-% x0 = [1.2;1.2];
+% x0 = [-1.8;-1.8];
+% sol = [1;-1];
 %x0 = [-1.2;1];
 
 % ex1
@@ -40,36 +41,41 @@ close all;
 %            -200 200];
 % x0 = [1.1;1.2];
 
-% ex2
+% ex2 - f2 
 % f = @(x) x(1).^2 + 4*x(2).^2 + 2*x(1)*x(2);
 % grad = @(x) [2*x(1)+2*x(2);
 %               8*x(2) + 2*x(1)];
 % x0 = [-3;-3];
+% sol = [0;0];
 
-% ex3
+% ex3 - f3
 % f = @(x) (x(1)+2*x(2)-7).^2 + (2*x(1)+x(2)-5).^2;
 % grad = @(x) [10*x(1)+8*x(2)-34;
 %             8*x(1)+10*x(2)-38];
 % x0 = [-9.5;9.5];
+% sol = [1;3];
 
-% ex4
+% ex4 -f4
 % f = @(x) 5*x(1)^4 + 6*x(2)^4 - 6*x(1)^2 + 2*x(1)*x(2) + 5*x(2)^2 + 15*x(1) - 7*x(2) + 13;
 % grad = @(x) [20*x(1)^3-12*x(1)+2*x(2)+15;
 %              24*x(2)^3+2*x(1)+10*x(2)-7];
 % x0 = [1.9;-1.9];
+% sol = [-1.1515;0.5455];
 
-% ex5
+% ex5  - f5
 % f = @(x) (x(1)^2)^(x(2)^2 +1) + (x(2)^2)^(x(1)^2 + 1);
 % grad = @(x) [(2*x(1)^(2*x(2)^2 +1))*(x(2)^2 +1)+x(1)*log(x(2))*4*x(2)^(2*(x(1)^2 +1));
 %             4*x(2)*log(x(1))*x(1)^(2*(x(2)^2+1))+2*(x(1)^2+1)*x(2)^(2*x(1)^2+1)];
 % x0 = [-1.5;1.25];
+% sol = [0;0];
 
-% ex7
+% ex6 - f6
 % f = @(x) x(1).^2 + x(2).^3 - (x(3).^4).^2 + (2*x(1)*x(2)*x(3)).^2 + (2*x(1)*x(2)-3*x(2)*x(3) +x(1)*x(3)).^2;
 % grad = @(x) [2*x(1)+8*x(1)*(x(2)*x(3)).^2+2*(2*x(2)+x(3))*(2*x(1)*x(2)+x(1)*x(3)-3*x(2)*x(3));
 %             3*x(2)^2+8*x(1)^2*x(2)*x(3)^2+2*(2*x(1)-3*x(3))*(2*x(1)*x(2)+x(1)*x(3)-3*x(2)*x(3))
 %             -8*x(3)^7+8*(x(1)^2)*(x(2)^2)*x(3)+2*(x(1)-3*x(2))*(2*x(1)*x(2)+x(1)*x(3)-3*x(2)*x(3))];
 % x0 = [0.10;0.10;0.10];
+% sol = [0;0;0];
 
 % new
 % f = @(x) 100*( x(2)^2 - 2*x(2)*x(1) + x(1)^2) + (1 - 2*x(1) + x(1)^2);
@@ -84,16 +90,23 @@ para = [1,0.1,0.99];
 %x = x0; 
 y = x0;
 B = eye(size(x0,1));
-for i = 1:2000
-%[yy,alpha(i)] = SteepestDescentDirection(f,grad,y,para);
+for i = 1:10000
+[yy,alpha(i)] = SteepestDescentDirection(f,grad,y,para);
 %[yy,alpha(i)] = NewtonDirection(f,grad,hess,y,para);
-[B,yy,alpha(i)] = BFGS(f,grad,y,B);
-if (norm(grad(yy)) < 1e-10)
+%[B,yy,alpha(i)] = BFGS(f,grad,y,B);
+error(i) = norm(sol - yy);
+if (norm(grad(yy)) < 1e-10 || error(i)<1e-10)
     break;
 end
 y =yy;
 end
+figure(1)
 plot(alpha)
 title('Step size alpha over iterations')
 xlabel('iteration')
 ylabel('Step size')
+figure(2)
+plot(error)
+title('Error ||analytic - final||')
+xlabel('iteration')
+ylabel('Error')
